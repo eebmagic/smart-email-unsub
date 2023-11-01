@@ -6,9 +6,10 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
 import json
-import base64
-from datetime import datetime
 
+from filters import filterMeta
+
+### AUTHENTICATION ###
 # Add the scope
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
@@ -30,29 +31,28 @@ else:
 
 service = build('gmail', 'v1', credentials=credentials)
 
-results = service.users().messages().list(userId='me', labelIds=['INBOX', 'UNREAD']).execute()
-messages = results.get('messages', [])
-print(f"Found {len(messages)} total unread messages in inbox")
+### GET MESSAGES IN TRASH ###
+# TODO: Maybe add pagination here to try to get more than 100 resulting messages
+results = service.users().messages().list(userId='me', labelIds=['TRASH', 'UNREAD']).execute()
+messageIds = results.get('messages', [])
+print(f"Found {len(messageIds)} total unread messages in inbox")
 
+print(f"Getting message bodies...")
+messages = [service.users().messages().get(userId='me', id=msg['id']).execute() for msg in messageIds]
 
-for message in messages:
-    msg_id = message['id']
-    msg = service.users().messages().get(userId='me', id=msg_id).execute()
-    received_date = datetime.fromtimestamp(int(msg['internalDate']) / 1000)
+print(f"Filtering message bodies...")
+filtered = filterMeta(messages)
+print(json.dumps(filtered, indent=2))
 
-    print('=' * 80)
-    print(json.dumps(msg, indent=2))
+# TODO: Use this regex to filter for receipt values:
+'''
+grep -E '\$\d{1,3}(,?\d{3})*(\.\d{2})?' message_samples.json
+'''
 
-    try:
-        if 'data' in msg['payload']['body']:
-            msg_body = base64.urlsafe_b64decode(msg['payload']['body']['data']).decode('utf-8')
-        elif 'data' in msg['payload']['parts'][0]['body']:
-            msg_body = base64.urlsafe_b64decode(msg['payload']['parts'][0]['body']['data']).decode('utf-8')
-        else:
-            msg_body = "No message body found."
-
-        print(f"Message ID: {msg_id}\nMessage Date: {received_date.strftime('%Y-%m-%d %H:%M:%S')}\nMessage Body:\n{msg_body}\n")
-    except Exception as e:
-        print(f"Error processing message with ID {msg_id}: {e}")
-
-    break
+# TODO: Handoff to vector db processing
+'''
+- Check that messages are not already in the db (by message id)
+- Get embeddings from new messages (through OpenAI embeddings)
+    - For truncated bodies AND snippets
+- Add new messages to the db with embeddings
+'''
