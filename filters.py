@@ -20,7 +20,7 @@ def packageBody(body, contentType):
     }
 
     if len(output['body']) < TRUNCATION_SIZE:
-        output['body-truncated'] = None
+        output['body-truncated'] = False
     else:
         output['body-truncated'] = output['body'][:TRUNCATION_SIZE]
     
