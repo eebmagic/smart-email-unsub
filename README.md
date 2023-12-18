@@ -35,3 +35,11 @@ This will find and present inbox messages that you should investigate.
 This may mean:
 - Unsubscribing from the relevant list
 - Moving the email to the appropriate folder (or trash)
+
+
+## TODO
+- [ ] Find unsub links
+    - Parse urls from messages, then get $N$ tokens before and after url. Get embeddings for these tokens, then use dbscan to try to find clusters for unsub links.
+    - These messages could then be prioritized as more manageable.
+- [ ] Create frontend for presentation
+    - Should present links to messages, dollar amounts, maybe neighbor messages
