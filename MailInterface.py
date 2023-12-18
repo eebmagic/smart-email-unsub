@@ -44,7 +44,7 @@ def getCredentials():
 credentials = getCredentials()
 service = build('gmail', 'v1', credentials=credentials)
 
-def getMessages(labels):
+def getMessages(labels, cap=None):
     '''
     Gets messages from GMAIL basd on labels.
     Example: labels=['TRASH', 'UNREAD']
@@ -62,6 +62,9 @@ def getMessages(labels):
         messageIds += results.get('messages', [])
 
     print(f"Found {len(messageIds)} total unread messages in {labels}")
+    if cap:
+        messageIds = messageIds[:cap]
+        print(f"Using only first {cap} messages")
 
     print(f"Getting message bodies...")
     gres = trashCollection.get(

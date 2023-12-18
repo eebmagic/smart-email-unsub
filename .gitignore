@@ -1,5 +1,6 @@
 .DS_Store
 __pycache__/
+.ipynb_checkpoints/
 
 credentials.json
 token.json
@@ -9,3 +10,4 @@ db/
 
 message_samples.json
 
+*.bak
