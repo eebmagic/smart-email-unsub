@@ -186,7 +186,7 @@ class SafeInterface():
 
         ignored = len(ids) - len(newIds) - len(updatedIds)
         if ignored != 0:
-            print(f"Ignored {ignored} documents because they already exist in the collection")
+            print(f"Ignored {ignored} / {len(ids)} documents because they already exist in the collection")
 
         print(f"Interface finished add process in {time.time() - addStart} seconds")
 
