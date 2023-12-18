@@ -16,7 +16,22 @@ This approach attempts to let you quickly clean out your inbox, while also manag
 ## Steps to Use
 
 ### 1. Run the processTrash.py script
+```
+python3 processTrash.py
+```
 This will process the unread messages in your trash folder.
 
 ### 2. Run the processInbox.py script
+```
+python3 processInbox.py
+```
 This will process all unread messages in the inbox and find messages that should be removable.
+
+### 3. Run the findRemovable.py script
+```
+python3 findRemovable.py
+```
+This will find and present inbox messages that you should investigate.
+This may mean:
+- Unsubscribing from the relevant list
+- Moving the email to the appropriate folder (or trash)
