@@ -41,5 +41,9 @@ This may mean:
 - [ ] Find unsub links
     - Parse urls from messages, then get $N$ tokens before and after url. Get embeddings for these tokens, then use dbscan to try to find clusters for unsub links.
     - These messages could then be prioritized as more manageable.
-- [ ] Create frontend for presentation
-    - Should present links to messages, dollar amounts, maybe neighbor messages
+- [ ] Update frontend for presentation
+    - Should present links to messages, dollar amounts, maybe neighbor messages  
+    - [ ] Add button to:
+        - [ ] Delete message
+        - [ ] Move message to receipts
+        - [ ] Find unsub link in body?
