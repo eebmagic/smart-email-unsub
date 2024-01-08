@@ -143,7 +143,98 @@ def filterMeta(messages):
     return result
 
 
+def getUnsubLinks(text, N=20, COUNT=2):
+    whitelist = [
+        'unsubscribe',
+        'manage',
+        'subscription',
+        'preferences',
+        'communications'
+    ]
+    def getWeights(toks, direction, whitelist=whitelist):
+        binary = []
+        for t in toks:
+            added = False
+            for word in whitelist:
+                # if t.lower() in word:
+                # if t.lower().strip() == word.strip():
+                if word in t.lower().strip():
+                    binary.append(True)
+                    added=True
+                    break
+            if not added:
+                binary.append(False)
+
+        N = len(toks)
+        assert len(binary) == N, "BINARY AND TOKS DIDNT MATCH LEN"
+        if direction == 'before':
+            denoms = range(N, 0, -1)
+        else:
+            denoms = range(1, N+1, 1)
+
+        weights = [(1/d if val else 0) for (val, d) in zip(binary, denoms)]
+        if len(weights) == 0:
+            weights = [0]
+
+        return weights
+
+    # Regex for extracting URLs
+    url_regex = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+
+    # Find all URLs in the text
+    urls = re.findall(url_regex, text)
+
+    # Tokenize the text
+    tokens = text.split()
+
+    # Find the indices of the tokens that are URLs
+    url_indices = [i for i, token in enumerate(tokens) if re.match(url_regex, token)]
+
+    # Extract N tokens before and after each URL
+    contexts = []
+    for index in url_indices:
+        start = max(0, index - N)  # Ensure the start is not negative
+        end = min(len(tokens), index + N + 1)  # Ensure the end does not exceed the length of the tokens
+        beforeTokens = tokens[start:index]
+        afterTokens = tokens[index + 1:end]
+        beforeWeights = getWeights(beforeTokens, 'before')
+        afterWeights = getWeights(afterTokens, 'after')
+        before = ' '.join(beforeTokens)
+        after = ' '.join(afterTokens)
+
+        contexts.append((tokens[index], before, after, max(beforeWeights), max(afterWeights)))
+
+    contexts = filter(
+        lambda x: max(x[3], x[4]) > 0,
+        contexts
+    )
+
+    contexts = sorted(
+        contexts,
+        key=lambda x: x[3]+x[4],
+        reverse=True
+    )
+
+    contexts = contexts[:COUNT]
+
+    formatted = [
+        {
+            'url': context[0],
+            'before': context[1],
+            'after': context[2],
+            'before-weight': context[3],
+            'after-weight': context[4]
+        }
+        for context in contexts
+    ]
+
+    return formatted
+
+
 def getUsefulBodies(messages):
+    with open("./frontend/src/links.json.json") as file:
+        links = json.load(file)
+
     ids = []
     bodies = []
     usedMessages = []
@@ -163,10 +254,14 @@ def getUsefulBodies(messages):
             for key, value in msg.items():
                 if type(value) == dict:
                     msg[key] = json.dumps(value, sort_keys=True)
+            links[msg['id']] = getUnsubLinks(msg['body'])
             usedMessages.append(msg)
         except:
             print(f"FAILED TO GET BODY FOR THIS MESSAGE:")
             print(json.dumps(msg, indent=2))
+
+    with open("./frontend/src/links.json.json", 'w') as file:
+        json.dump(links, file, indent=2)
 
     return ids, bodies, usedMessages
 

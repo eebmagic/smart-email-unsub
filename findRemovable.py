@@ -6,6 +6,9 @@ THRESHOLD = 0.3
 SENDER_MUST_MATCH = True
 MIN_NUM_NEIGHBORS = 4
 
+with open("./frontend/src/links.json") as file:
+    links = json.load(file)
+
 inboxResults = inboxCacheCollection.get(include=['documents', 'metadatas', 'embeddings'])
 
 qres = trashCollection.query(
@@ -30,6 +33,7 @@ for i, msg in enumerate(inboxResults['metadatas']):
     if min(dists) < THRESHOLD and numNeighbors >= MIN_NUM_NEIGHBORS:
         msg['averageDist'] = sum(validDists) / len(validDists)
         msg['numNeighbors'] = numNeighbors
+        msg['unsub-links'] = links[msg['id']]
         results.append(msg)
         print(sender)
         print(dollars)
@@ -53,5 +57,7 @@ for i, msg in enumerate(inboxResults['metadatas']):
                 print('\t', snippet)
         print('\n====================')
 
-with open(f'./frontend/src/removableResults.json', 'w') as file:
-    json.dump(results, file)
+exportPath = "./frontend/src/removableResults.json"
+with open(exportPath, 'w') as file:
+    json.dump(results, file, indent=2)
+    print(f"WROTE TO FILE: {exportPath}")
