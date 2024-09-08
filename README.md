@@ -8,6 +8,9 @@ Then a clean list of unread emails in your inbox will be presented, along with u
 
 This approach attempts to let you quickly clean out your inbox, while also managing email subscriptions to avoid future clutter.
 
+## Auth
+To get a `credentials.json` file go to [this google dashboard](https://console.cloud.google.com/apis/credentials?project=inbox-unsubscriber) > project name > Credentials > `oAuth 2.0 Client IDs` > Download
+
 ## Dependencies
 1. Install python requirements
 2. Get a OpenAI API token
